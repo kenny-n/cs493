@@ -1,4 +1,4 @@
 {
-    "GCLOUD_PROJECT": "[YOUR-PROJECT-ID]",
+    "GCLOUD_PROJECT": "kngo493-003",
     "DATA_BACKEND": "datastore"
 }
