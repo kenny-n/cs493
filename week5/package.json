@@ -11,7 +11,8 @@
     "@google-cloud/datastore": "^1.4.2",
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
-    "google-gax": "^0.20.0"
+    "google-gax": "^0.20.0",
+    "pug": "^2.0.3"
   },
   "devDependencies": {},
   "scripts": {

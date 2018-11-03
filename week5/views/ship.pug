@@ -1,0 +1,12 @@
+html
+  head
+    title= 'week 5 assignment'
+  body
+    h1= 'ship'
+    ul
+      li= 'id: ' + ship.id
+      li= 'name: ' + ship.name
+      li= 'type: ' + ship.type
+      li= 'length: ' + ship.length
+      li= 'self: '
+        a(href= ship.id) !{ship.self}
