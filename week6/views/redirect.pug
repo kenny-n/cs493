@@ -1,0 +1,16 @@
+html
+  head
+    title= 'week 6 assignment - redirect'
+    link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css')
+  body
+    div.container
+      div.row
+        h3.text-muted= 'week 6 assignment'
+      div.row
+        div.jumbotron  
+          h3.display-4= 'hey ' + display_name + ' / (' + first_name + ' ' + last_name + ')'
+          p.lead
+            a.btn.btn-primary.btn-lg(target="_blank", href= url) google+
+          p='state: ' + state
+          hr.my-4
+          p.lead= 'you are logged in. you should see your g+ display name followed by first and last name in parenthesis. you can also see a button that will direct you to your g+ profile. finally there is a randomly generated state variable that was created when you clicked the log in button previously.'
