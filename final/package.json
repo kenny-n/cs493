@@ -1,0 +1,27 @@
+{
+  "name": "kngo493-final",
+  "version": "1.0.0",
+  "description": "api for 493 final",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kenny-n/cs493.git"
+  },
+  "main": "server.js",
+  "dependencies": {
+    "@google-cloud/datastore": "^1.4.2",
+    "auth0-js": "^9.8.2",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "express-jwt": "^5.3.1",
+    "google-gax": "^0.20.0",
+    "jwks-rsa": "^1.3.0",
+    "pug": "^2.0.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "kenngo",
+  "license": "ISC"
+}
