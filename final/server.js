@@ -38,13 +38,6 @@ const checkJwt = jwt({
   algorithms: ['RS256']
 });
 
-function uuid4() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
-
 /* ------------- Begin Album Model Functions ------------- */
 function get_albums(owner){
     const q = datastore.createQuery(ALBUM);
@@ -67,15 +60,16 @@ async function get_album(album_id){
     return album;
 }
 
-function post_album(name, type, length, owner){
-    let id = uuid4();
+function post_album(title, artist, year, genre){
+    let id = title + '_' + artist;
     let key = datastore.key([ALBUM, id]);
     const album = {
-        "id": id,
-        "name": name,
-        "type": type,
-        "length": length,
-        "owner": owner,
+        "id": title + '_' + artist,
+        "title": title,
+        "artist": artist,
+        "year": year,
+        "genre": genre,
+        "songs": null,
         "self": url + "albums/" + id
     };
     return datastore.save({"key":key, "data":album}).then(() => {return key});
@@ -103,7 +97,7 @@ async function delete_album(album_id, username){
         throw e;
     }
 
-    album.log(album_id + " deleted");
+    console.log(album_id + " deleted");
     return datastore.delete(key);
 }
 /* ------------- End Album Model Functions ------------- */
@@ -130,15 +124,15 @@ async function get_song(song_id){
     return song;
 }
 
-function post_song(name, type, length, owner){
-    let id = uuid4();
+function post_song(title, artist, album, owner){
+    let id = title + '_' + artist;
     let key = datastore.key([SONG, id]);
     const song = {
         "id": id,
-        "name": name,
+        "title": title,
+        "artist": artist,
         "album": album,
         "length": length,
-        "owner": owner,
         "self": url + "songs/" + id
     };
     return datastore.save({"key":key, "data":song}).then(() => {return key});
@@ -173,7 +167,7 @@ async function delete_song(song_id, username){
 
 /* ------------- Begin Album Controller Functions ------------- */
 router.get('/albums', function(req, res) {
-  album.log("Viewing all albums");
+  console.log("Viewing all albums");
   const query = datastore.createQuery(ALBUM);
 
   datastore.runQuery(query, function(err, entities) {
@@ -185,16 +179,16 @@ router.get('/albums', function(req, res) {
 });
 
 router.get('/albums/:album_id', function(req, res) {
-  album.log("Viewing album " + req.params.album_id);
+  console.log("Viewing album " + req.params.album_id);
   return get_album(req.params.album_id)
   .then(album => {
-    album.log(album);
+    console.log(album);
     res.status(200).json(album);
   }).catch(function(error) {
     if (error.name === 'InvalidAlbumIdError') {
       res.status(404).send({ error:"no album found with this id"});
     } else {
-      album.log(error);
+      console.log(error);
       res.status(500).send({ error:"unknown get album error"});
     }
   })
@@ -206,16 +200,16 @@ router.get('/users/:user_id/albums', checkJwt, function(req, res){
   }
   const albums = get_albums(req.params.user_id)
   .then( (album) => {
-    album.log(album);
+    console.log(album);
     res.status(200).json(album);
   }).catch(function(error) {
-    album.log(error);
+    console.log(error);
     res.status(500).send({ error:"post album error"});
   });
 });
 
 router.post('/albums', checkJwt, function(req, res){
-  album.log(req.body);
+  console.log(req.body);
   if (req.user.name) {
     if(req.get('content-type') !== 'application/json'){
       res.status(415).send('Server only accepts application/json data.')
@@ -225,7 +219,7 @@ router.post('/albums', checkJwt, function(req, res){
       res.location(req.protocol + "://" + req.get('host') + req.baseUrl + '/' + key.name);
       res.status(201).send('{ "id": \"' + key.name + '\" }')
     }).catch(function(error) {
-      album.log(error);
+      console.log(error);
       res.status(500).send({ error:"post album error"});
     });
   } else {
@@ -234,7 +228,7 @@ router.post('/albums', checkJwt, function(req, res){
 });
 
 router.delete('/albums/:album_id', checkJwt, function(req, res){
-  album.log("Deleting album " + req.params.album_id);
+  console.log("Deleting album " + req.params.album_id);
   return delete_album(req.params.album_id, req.user.name)
   .then(result => {
     res.status(204).send('deleted album');
@@ -246,7 +240,7 @@ router.delete('/albums/:album_id', checkJwt, function(req, res){
     } else if (error.name === 'IncorrectAlbumCreatorError') {
       res.status(403).send({ error:"only owner can delete this album"});
     } else {
-      album.log(error);
+      console.log(error);
       res.status(500).send({ error:"unknown delete album error"});
     }
   });
@@ -256,7 +250,7 @@ router.delete('/albums/:album_id', checkJwt, function(req, res){
 
 /* ------------- Begin Song Controller Functions ------------- */
 router.get('/songs', function(req, res) {
-    album.log("Viewing all songs");
+    console.log("Viewing all songs");
     const query = datastore.createQuery(SONG);
 
     datastore.runQuery(query, function(err, entities) {
@@ -268,16 +262,16 @@ router.get('/songs', function(req, res) {
 });
 
 router.get('/songs/:song_id', function(req, res) {
-    album.log("Viewing song " + req.params.song_id);
+    console.log("Viewing song " + req.params.song_id);
     return get_song(req.params.song_id)
         .then(song => {
-            album.log(song);
+            console.log(song);
             res.status(200).json(song);
         }).catch(function(error) {
             if (error.name === 'InvalidSongIdError') {
                 res.status(404).send({ error:"no song found with this id"});
             } else {
-                album.log(error);
+                console.log(error);
                 res.status(500).send({ error:"unknown get song error"});
             }
         })
@@ -289,16 +283,16 @@ router.get('/users/:user_id/songs', checkJwt, function(req, res){
     }
     return get_songs(req.params.user_id)
         .then( (song) => {
-            album.log(song);
+            console.log(song);
             res.status(200).json(song);
         }).catch(function(error) {
-            album.log(error);
+            console.log(error);
             res.status(500).send({ error:"post song error"});
         });
 });
 
 router.post('/songs', checkJwt, function(req, res){
-    album.log(req.body);
+    console.log(req.body);
     if (req.user.name) {
         if(req.get('content-type') !== 'application/json'){
             res.status(415).send('Server only accepts application/json data.')
@@ -308,7 +302,7 @@ router.post('/songs', checkJwt, function(req, res){
                 res.location(req.protocol + "://" + req.get('host') + req.baseUrl + '/' + key.name);
                 res.status(201).send('{ "id": \"' + key.name + '\" }')
             }).catch(function(error) {
-            album.log(error);
+            console.log(error);
             res.status(500).send({ error:"post song error"});
         });
     } else {
@@ -317,7 +311,7 @@ router.post('/songs', checkJwt, function(req, res){
 });
 
 router.delete('/songs/:song_id', checkJwt, function(req, res){
-    album.log("Deleting song " + req.params.song_id);
+    console.log("Deleting song " + req.params.song_id);
     return delete_song(req.params.song_id, req.user.name)
         .then(result => {
             res.status(204).send('deleted song');
@@ -329,7 +323,7 @@ router.delete('/songs/:song_id', checkJwt, function(req, res){
             } else if (error.name === 'IncorrectSongCreatorError') {
                 res.status(403).send({ error:"only owner can delete this song"});
             } else {
-                album.log(error);
+                console.log(error);
                 res.status(500).send({ error:"unknown delete song error"});
             }
         });
@@ -366,5 +360,5 @@ app.use('/', login);
 // Listen to the App Engine-specified port, or 8080 otherwise
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  album.log(`Server listening on port ${PORT}...`);
+  console.log(`Server listening on port ${PORT}...`);
 });
